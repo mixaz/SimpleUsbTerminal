@@ -60,7 +60,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private Connected connected = Connected.False;
     private boolean initialStart = true;
-    private boolean hexEnabled = false;
+    private boolean hexEnabled = true;
     private boolean controlLinesEnabled = false;
     private boolean pendingNewline = false;
     private String newline = TextUtil.newline_crlf;
