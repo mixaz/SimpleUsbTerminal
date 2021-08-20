@@ -334,12 +334,27 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         }
     }
 
+    Handler mHandler = new Handler();
+    Runnable mTicker = new Runnable() {
+        @Override
+        public void run() {
+            StringBuilder buf = new StringBuilder();
+            for(int i=0; i<MAX_LINES; i++) {
+                int ii = (cycleBufferEnd + i) % MAX_LINES;
+                if(linesText[ii] != null)
+                    buf.append(linesText[ii]);
+            }
+            receiveText.setText(buf.toString());
+        }
+    };
+
     private static final int MAX_LINES = 50;
 
     private int cycleBufferEnd = 0;
     private String linesText[] = new String[MAX_LINES];
 
     private void receive(byte[] data) {
+        mHandler.removeCallbacks(mTicker);
         if(hexEnabled) {
             linesText[cycleBufferEnd++] = TextUtil.toHexString(data) + '\n';
         } else {
@@ -357,13 +372,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             linesText[cycleBufferEnd++] = TextUtil.toCaretString(msg, newline.length() != 0).toString();
         }
         cycleBufferEnd %= MAX_LINES;
-        StringBuilder buf = new StringBuilder();
-        for(int i=0; i<MAX_LINES; i++) {
-            int ii = (cycleBufferEnd + i) % MAX_LINES;
-            if(linesText[ii] != null)
-                buf.append(linesText[ii]);
-        }
-        receiveText.setText(buf.toString());
+        mHandler.postDelayed(mTicker, 200);
     }
 
 //    private void receive(byte[] data) {
