@@ -334,25 +334,57 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         }
     }
 
+    private static final int MAX_LINES = 50;
+
+    private int cycleBufferEnd = 0;
+    private String linesText[] = new String[MAX_LINES];
+
     private void receive(byte[] data) {
         if(hexEnabled) {
-            receiveText.append(TextUtil.toHexString(data) + '\n');
+            linesText[cycleBufferEnd++] = TextUtil.toHexString(data) + '\n';
         } else {
             String msg = new String(data);
             if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
                 // don't show CR as ^M if directly before LF
                 msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
                 // special handling if CR and LF come in separate fragments
-                if (pendingNewline && msg.charAt(0) == '\n') {
-                    Editable edt = receiveText.getEditableText();
-                    if (edt != null && edt.length() > 1)
-                        edt.replace(edt.length() - 2, edt.length(), "");
+                if (msg.charAt(0) == '\n') {
+                    int prevLine = (cycleBufferEnd + MAX_LINES - 1) % MAX_LINES;
+                    if(linesText[prevLine] != null && linesText[prevLine].endsWith("\r"))
+                        linesText[prevLine] = linesText[prevLine].substring(0,linesText[prevLine].length()-1);
                 }
-                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
             }
-            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
+            linesText[cycleBufferEnd++] = TextUtil.toCaretString(msg, newline.length() != 0).toString();
         }
+        cycleBufferEnd %= MAX_LINES;
+        String sss = "";
+        for(int i=0; i<MAX_LINES; i++) {
+            int ii = (cycleBufferEnd + i) % MAX_LINES;
+            if(linesText[ii] != null)
+                sss += linesText[ii];
+        }
+        receiveText.setText(sss);
     }
+
+//    private void receive(byte[] data) {
+//        if(hexEnabled) {
+//            receiveText.append(TextUtil.toHexString(data) + '\n');
+//        } else {
+//            String msg = new String(data);
+//            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
+//                // don't show CR as ^M if directly before LF
+//                msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
+//                // special handling if CR and LF come in separate fragments
+//                if (pendingNewline && msg.charAt(0) == '\n') {
+//                    Editable edt = receiveText.getEditableText();
+//                    if (edt != null && edt.length() > 1)
+//                        edt.replace(edt.length() - 2, edt.length(), "");
+//                }
+//                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
+//            }
+//            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
+//        }
+//    }
 
     void status(String str) {
         SpannableStringBuilder spn = new SpannableStringBuilder(str + '\n');
