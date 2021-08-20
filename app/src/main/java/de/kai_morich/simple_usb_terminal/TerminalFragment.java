@@ -354,7 +354,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private String linesText[] = new String[MAX_LINES];
 
     private void receive(byte[] data) {
-        mHandler.removeCallbacks(mTicker);
         if(hexEnabled) {
             linesText[cycleBufferEnd++] = TextUtil.toHexString(data) + '\n';
         } else {
@@ -372,6 +371,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             linesText[cycleBufferEnd++] = TextUtil.toCaretString(msg, newline.length() != 0).toString();
         }
         cycleBufferEnd %= MAX_LINES;
+        mHandler.removeCallbacks(mTicker);
         mHandler.postDelayed(mTicker, 200);
     }
 
