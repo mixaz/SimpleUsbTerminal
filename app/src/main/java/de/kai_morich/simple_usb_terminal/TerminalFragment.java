@@ -357,13 +357,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             linesText[cycleBufferEnd++] = TextUtil.toCaretString(msg, newline.length() != 0).toString();
         }
         cycleBufferEnd %= MAX_LINES;
-        String sss = "";
+        StringBuilder buf = new StringBuilder();
         for(int i=0; i<MAX_LINES; i++) {
             int ii = (cycleBufferEnd + i) % MAX_LINES;
             if(linesText[ii] != null)
-                sss += linesText[ii];
+                buf.append(linesText[ii]);
         }
-        receiveText.setText(sss);
+        receiveText.setText(buf.toString());
     }
 
 //    private void receive(byte[] data) {
