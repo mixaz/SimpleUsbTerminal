@@ -299,6 +299,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void disconnect() {
+//        mHandler.removeCallbacks(mTicker);
         connected = Connected.False;
         controlLines.stop();
         service.disconnect();
@@ -338,17 +339,23 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     Runnable mTicker = new Runnable() {
         @Override
         public void run() {
-            StringBuilder buf = new StringBuilder();
-            for(int i=0; i<MAX_LINES; i++) {
-                int ii = (cycleBufferEnd + i) % MAX_LINES;
-                if(linesText[ii] != null)
-                    buf.append(linesText[ii]);
+            if(newData) {
+                newData = false;
+                StringBuilder buf = new StringBuilder();
+                for (int i = 0; i < MAX_LINES; i++) {
+                    int ii = (cycleBufferEnd + i) % MAX_LINES;
+                    if (linesText[ii] != null)
+                        buf.append(linesText[ii]);
+                }
+                receiveText.setText(buf.toString());
             }
-            receiveText.setText(buf.toString());
+            mHandler.postDelayed(mTicker, 200);
         }
     };
 
     private static final int MAX_LINES = 50;
+
+    private boolean newData;
 
     private int cycleBufferEnd = 0;
     private String linesText[] = new String[MAX_LINES];
@@ -371,8 +378,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             linesText[cycleBufferEnd++] = TextUtil.toCaretString(msg, newline.length() != 0).toString();
         }
         cycleBufferEnd %= MAX_LINES;
-        mHandler.removeCallbacks(mTicker);
-        mHandler.postDelayed(mTicker, 200);
+        newData = true;
     }
 
 //    private void receive(byte[] data) {
@@ -410,6 +416,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         connected = Connected.True;
         if(controlLinesEnabled)
             controlLines.start();
+        mHandler.postDelayed(mTicker, 200);
     }
 
     @Override
