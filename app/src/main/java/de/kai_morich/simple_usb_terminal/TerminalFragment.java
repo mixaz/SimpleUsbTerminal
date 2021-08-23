@@ -46,6 +46,8 @@ import java.util.EnumSet;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
+    private static final int MAX_LINES = 50;
+
     private enum Connected { False, Pending, True }
 
     private final BroadcastReceiver broadcastReceiver;
@@ -62,8 +64,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private boolean initialStart = true;
     private boolean hexEnabled = false;
     private boolean controlLinesEnabled = false;
-    private boolean pendingNewline = false;
     private String newline = TextUtil.newline_crlf;
+
+    private boolean newData;
+    private int cycleBufferEnd = 0;
+    private String linesText[] = new String[MAX_LINES];
 
     public TerminalFragment() {
         broadcastReceiver = new BroadcastReceiver() {
@@ -353,13 +358,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         }
     };
 
-    private static final int MAX_LINES = 50;
-
-    private boolean newData;
-
-    private int cycleBufferEnd = 0;
-    private String linesText[] = new String[MAX_LINES];
-
     private void receive(byte[] data) {
         if(hexEnabled) {
             linesText[cycleBufferEnd++] = TextUtil.toHexString(data) + '\n';
@@ -380,26 +378,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         cycleBufferEnd %= MAX_LINES;
         newData = true;
     }
-
-//    private void receive(byte[] data) {
-//        if(hexEnabled) {
-//            receiveText.append(TextUtil.toHexString(data) + '\n');
-//        } else {
-//            String msg = new String(data);
-//            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
-//                // don't show CR as ^M if directly before LF
-//                msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
-//                // special handling if CR and LF come in separate fragments
-//                if (pendingNewline && msg.charAt(0) == '\n') {
-//                    Editable edt = receiveText.getEditableText();
-//                    if (edt != null && edt.length() > 1)
-//                        edt.replace(edt.length() - 2, edt.length(), "");
-//                }
-//                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
-//            }
-//            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
-//        }
-//    }
 
     void status(String str) {
         SpannableStringBuilder spn = new SpannableStringBuilder(str + '\n');
