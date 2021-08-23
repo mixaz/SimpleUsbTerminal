@@ -32,6 +32,6 @@ Here you find a simplified version of my app.
 
 ## Differences with upstream repo
 
-With high data flow there are issues with performance of TextView UI control, so UI thread gets too busy showing each chunhk of data from UART and causing ANR. This fork processes serial data out of UI thread and updates TextView each 200ms, so ANR should not happen.
+With high data flow there are issues with performance of TextView UI control, so UI thread gets too busy showing each chunk of data from UART and causing ANR. This fork processes serial data out of UI thread and updates TextView each 200ms, so ANR should not happen.
 
 The second change is that serial data are not kept in queue when Terminal window isn't foreground (to save RAM). Only 50 last chunks of data are kept.
