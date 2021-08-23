@@ -213,15 +213,15 @@ public class SerialService extends Service implements SerialListener {
         if(connected) {
             synchronized (this) {
                 if (listener != null) {
-                    mainLooper.post(() -> {
-                        if (listener != null) {
+//                    mainLooper.post(() -> {
+//                        if (listener != null) {
                             listener.onSerialRead(data);
-                        } else {
-                            queue1.add(new QueueItem(QueueType.Read, data, null));
-                        }
-                    });
-                } else {
-                    queue2.add(new QueueItem(QueueType.Read, data, null));
+//                        } else {
+//                            queue1.add(new QueueItem(QueueType.Read, data, null));
+//                        }
+//                    });
+//                } else {
+//                    queue2.add(new QueueItem(QueueType.Read, data, null));
                 }
             }
         }
